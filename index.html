@@ -131,6 +131,49 @@
   .exit-exclude-btn { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700; margin-left: 10px; flex-shrink: 0; }
   .add-btn-disabled { width: 30px; height: 30px; border-radius: 10px; background: #0f172a; color: #fff; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 4px; opacity: 0.4; }
   .search-item.excluded, .step-item.excluded { opacity: 0.55; }
+  .gear-btn { width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; border: none; cursor: pointer; }
+.header-row { display: flex; align-items: center; justify-content: space-between; }
+.header-left { flex: 1; }
+.customize-card { display: flex; align-items: center; background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 10px; border: 1px solid #e2e8f0; cursor: pointer; }
+.customize-card-info { flex: 1; margin-right: 10px; }
+.customize-card-name { font-size: 15px; font-weight: 700; color: #0f172a; }
+.customize-card-full { font-size: 12px; color: #64748b; margin-top: 3px; }
+.customize-card-right { display: flex; align-items: center; gap: 8px; }
+.customize-card-count { font-size: 12px; color: #64748b; font-weight: 500; }
+.customize-arrow { font-size: 20px; color: #64748b; font-weight: 300; }
+.add-cat-btn { border: 1.5px dashed #3b82f6; border-radius: 14px; padding: 16px 0; text-align: center; margin-top: 4px; background: none; width: 100%; cursor: pointer; }
+.add-cat-btn-text { color: #3b82f6; font-size: 14px; font-weight: 700; }
+.tip-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.tip-text { flex: 1; font-size: 12px; color: #64748b; font-weight: 500; }
+.reset-btn { background: #fee2e2; padding: 6px 12px; border-radius: 8px; color: #ef4444; font-size: 12px; font-weight: 700; border: none; cursor: pointer; }
+.cat-edit-header { display: flex; align-items: center; justify-content: space-between; background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+.cat-edit-info { flex: 1; margin-right: 10px; }
+.cat-edit-name { font-size: 16px; font-weight: 700; color: #0f172a; }
+.cat-edit-full { font-size: 12px; color: #64748b; margin-top: 3px; }
+.cat-edit-btn { background: #eff6ff; padding: 8px 14px; border-radius: 8px; color: #3b82f6; font-size: 12px; font-weight: 700; border: none; cursor: pointer; }
+.customize-step-card { display: flex; align-items: center; background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 10px; border: 1px solid #e2e8f0; cursor: pointer; }
+.customize-step-seq { min-width: 38px; height: 26px; padding: 0 8px; border-radius: 8px; background: #0f172a; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: #fff; font-size: 12px; font-weight: 700; }
+.customize-step-info { flex: 1; margin-right: 10px; }
+.customize-step-name { font-size: 13px; font-weight: 600; color: #0f172a; line-height: 18px; }
+.customize-step-sub { font-size: 12px; color: #64748b; margin-top: 3px; }
+.delete-cat-btn { margin-top: 20px; padding: 14px 0; text-align: center; background: #fee2e2; border-radius: 12px; width: 100%; color: #ef4444; font-size: 14px; font-weight: 700; border: none; cursor: pointer; }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+.form-input { background: #fff; border-radius: 12px; padding: 12px 14px; font-size: 14px; color: #0f172a; border: 1px solid #e2e8f0; width: 100%; outline: none; }
+.form-input-multi { min-height: 60px; resize: vertical; }
+.edit-actions { display: flex; gap: 12px; margin-top: 20px; }
+.delete-step-btn { flex: 1; padding: 14px 0; text-align: center; background: #fee2e2; border-radius: 12px; color: #ef4444; font-size: 14px; font-weight: 700; border: none; cursor: pointer; }
+.save-step-btn { flex: 1; padding: 14px 0; text-align: center; background: #10b981; border-radius: 12px; color: #fff; font-size: 14px; font-weight: 700; border: none; cursor: pointer; }
+.save-step-btn:disabled { opacity: 0.4; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 200; }
+.modal-content { background: #fff; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; }
+.modal-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+.modal-label { font-size: 12px; color: #64748b; margin-bottom: 6px; margin-top: 10px; font-weight: 500; }
+.modal-input { background: #f8fafc; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: #0f172a; border: 1px solid #e2e8f0; width: 100%; outline: none; }
+.modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+.modal-cancel-btn { flex: 1; padding: 12px 0; text-align: center; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; color: #64748b; font-size: 14px; font-weight: 600; cursor: pointer; }
+.modal-save-btn { flex: 1; padding: 12px 0; text-align: center; background: #3b82f6; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 700; border: none; cursor: pointer; }
+.modal-save-btn:disabled { opacity: 0.4; }
 
   /* Empty state */
   .empty-state { padding: 60px 0; text-align: center; }
@@ -2810,7 +2853,8 @@ const initialState = {
   workGroups: [],
   history: [],
   excludeMode: false,
-  excludedSeqs: []
+  excludedSeqs: [],
+  categories: WORK_SCORES.categories
 };
 function appReducer(state, action) {
   switch (action.type) {
@@ -2947,6 +2991,32 @@ function appReducer(state, action) {
         excludeMode: false,
         excludedSeqs: []
       };
+    case 'LOAD_CATEGORIES':
+      return { ...state, categories: action.payload };
+    case 'ADD_CATEGORY': {
+      const newCat = { id: Date.now(), name: action.payload.name || '新工种', short_name: action.payload.short_name || '新工种', steps: [] };
+      return { ...state, categories: [...state.categories, newCat] };
+    }
+    case 'UPDATE_CATEGORY': {
+      const { id, updates } = action.payload;
+      return { ...state, categories: state.categories.map(c => c.id === id ? { ...c, ...updates } : c) };
+    }
+    case 'DELETE_CATEGORY':
+      return { ...state, categories: state.categories.filter(c => c.id !== action.payload.id) };
+    case 'ADD_STEP': {
+      const { categoryId, step } = action.payload;
+      return { ...state, categories: state.categories.map(c => c.id === categoryId ? { ...c, steps: [...c.steps, { ...step }] } : c) };
+    }
+    case 'UPDATE_STEP': {
+      const { categoryId, seq, updates } = action.payload;
+      return { ...state, categories: state.categories.map(c => c.id === categoryId ? { ...c, steps: c.steps.map(s => s.seq === seq ? { ...s, ...updates } : s) } : c) };
+    }
+    case 'DELETE_STEP': {
+      const { categoryId, seq } = action.payload;
+      return { ...state, categories: state.categories.map(c => c.id === categoryId ? { ...c, steps: c.steps.filter(s => s.seq !== seq) } : c) };
+    }
+    case 'RESET_CATEGORIES':
+      return { ...state, categories: WORK_SCORES.categories };
     case 'ADD_HISTORY':
       return {
         ...state,
@@ -3099,12 +3169,17 @@ function HomeScreen({
   return /*#__PURE__*/React.createElement("div", {
     className: "app"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "header"
+    className: "header header-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "header-left"
   }, /*#__PURE__*/React.createElement("div", {
     className: "header-title"
   }, "\u5DE5\u5206\u7EDF\u8BA1"), /*#__PURE__*/React.createElement("div", {
     className: "header-subtitle"
-  }, "2026\u5E74\u7535\u5B50\u7EC4\u5DE5\u5206\u7EC6\u5219")), /*#__PURE__*/React.createElement("div", {
+  }, "2026\u5E74\u7535\u5B50\u7EC4\u5DE5\u5206\u7EC6\u5219")), /*#__PURE__*/React.createElement("button", {
+    className: "gear-btn",
+    onClick: () => ctx.navigate({ name: 'customize' })
+  }, "\u2699")), /*#__PURE__*/React.createElement("div", {
     className: "body"
   }, /*#__PURE__*/React.createElement("div", {
     className: "tabbar"
@@ -3955,6 +4030,159 @@ function OutputScreen({
     onClick: handleComplete
   }, "\u5B8C\u6210\u5E76\u4FDD\u5B58")));
 }
+function CustomizeScreen(_ref) {
+  var ctx = _ref.ctx;
+  var categories = ctx.categories, dispatch = ctx.dispatch;
+  var _useState = useState('list'), level = _useState[0], setLevel = _useState[1];
+  var _useState2 = useState(null), selCategoryId = _useState2[0], setSelCategoryId = _useState2[1];
+  var _useState3 = useState(null), selStepSeq = _useState3[0], setSelStepSeq = _useState3[1];
+  var _useState4 = useState(false), isNewStep = _useState4[0], setIsNewStep = _useState4[1];
+  var _useState5 = useState(false), catEditModal = _useState5[0], setCatEditModal = _useState5[1];
+  var _useState6 = useState(''), catEditName = _useState6[0], setCatEditName = _useState6[1];
+  var _useState7 = useState(''), catEditShort = _useState7[0], setCatEditShort = _useState7[1];
+  var _useState8 = useState(null), catEditId = _useState8[0], setCatEditId = _useState8[1];
+  var _useState9 = useState(false), addCatModal = _useState9[0], setAddCatModal = _useState9[1];
+  var _useState10 = useState(''), newCatName = _useState10[0], setNewCatName = _useState10[1];
+  var _useState11 = useState(''), newCatShort = _useState11[0], setNewCatShort = _useState11[1];
+  var _useState12 = useState(''), editSeq = _useState12[0], setEditSeq = _useState12[1];
+  var _useState13 = useState(''), editName = _useState13[0], setEditName = _useState13[1];
+  var _useState14 = useState(''), editScore = _useState14[0], setEditScore = _useState14[1];
+  var _useState15 = useState(''), editUnit = _useState15[0], setEditUnit = _useState15[1];
+
+  var selCategory = categories.find(function(c) { return c.id === selCategoryId; });
+
+  var confirmFn = function(msg, onConfirm) {
+    if (window.confirm(msg)) onConfirm();
+  };
+
+  var goBack = function() {
+    if (level === 'edit') setLevel('steps');
+    else if (level === 'steps') { setLevel('list'); setSelCategoryId(null); }
+    else ctx.navigate({ name: 'home' });
+  };
+
+  var title = level === 'list' ? '\u81EA\u5B9A\u4E49\u5DE5\u79CD' : level === 'steps' ? (selCategory ? selCategory.short_name : '') : (isNewStep ? '\u65B0\u589E\u5DE5\u6B65' : '\u7F16\u8F91\u5DE5\u6B65');
+
+  var canSave = editName.trim() && editScore.trim() && editSeq.trim();
+
+  var handleSave = function() {
+    if (!canSave) return;
+    var stepData = { seq: parseInt(editSeq) || Date.now(), name: editName.trim(), score: parseFloat(editScore) || 0, unit: editUnit.trim() };
+    if (isNewStep) {
+      dispatch({ type: 'ADD_STEP', payload: { categoryId: selCategoryId, step: stepData } });
+    } else {
+      dispatch({ type: 'UPDATE_STEP', payload: { categoryId: selCategoryId, seq: selStepSeq, updates: stepData } });
+    }
+    setLevel('steps');
+  };
+
+  return React.createElement("div", { className: "app" },
+    React.createElement("div", { className: "navbar" },
+      React.createElement("button", { className: "nav-back", onClick: goBack }, "\u2039"),
+      React.createElement("div", { className: "nav-title" }, title),
+      React.createElement("div", { className: "nav-count" })
+    ),
+    React.createElement("div", { className: "body", style: { paddingBottom: 60 } },
+      level === 'list' ? React.createElement(React.Fragment, null,
+        React.createElement("div", { className: "tip-bar" },
+          React.createElement("div", { className: "tip-text" }, "\u70B9\u51FB\u5DE5\u79CD\u67E5\u770B\u5DE5\u6B65\uFF0C\u53EF\u589E\u5220\u6539\u6240\u6709\u5C5E\u6027"),
+          React.createElement("button", { className: "reset-btn", onClick: function() { confirmFn('\u6062\u590D\u9ED8\u8BA4\u5C06\u6E05\u9664\u6240\u6709\u81EA\u5B9A\u4E49\u4FEE\u6539\uFF0C\u786E\u5B9A\u5417\uFF1F', function() { dispatch({ type: 'RESET_CATEGORIES' }); }) } }, "\u6062\u590D\u9ED8\u8BA4")
+        ),
+        categories.map(function(cat) {
+          return React.createElement("div", { key: cat.id, className: "customize-card", onClick: function() { setSelCategoryId(cat.id); setLevel('steps'); } },
+            React.createElement("div", { className: "customize-card-info" },
+              React.createElement("div", { className: "customize-card-name" }, cat.short_name),
+              React.createElement("div", { className: "customize-card-full" }, cat.name)
+            ),
+            React.createElement("div", { className: "customize-card-right" },
+              React.createElement("div", { className: "customize-card-count" }, cat.steps.length + " \u9879"),
+              React.createElement("div", { className: "customize-arrow" }, "\u203A")
+            )
+          );
+        }),
+        React.createElement("button", { className: "add-cat-btn", onClick: function() { setNewCatName(''); setNewCatShort(''); setAddCatModal(true); } },
+          React.createElement("span", { className: "add-cat-btn-text" }, "+ \u65B0\u589E\u5DE5\u79CD")
+        )
+      ) : null,
+
+      level === 'steps' && selCategory ? React.createElement(React.Fragment, null,
+        React.createElement("div", { className: "cat-edit-header" },
+          React.createElement("div", { className: "cat-edit-info" },
+            React.createElement("div", { className: "cat-edit-name" }, selCategory.short_name),
+            React.createElement("div", { className: "cat-edit-full" }, selCategory.name)
+          ),
+          React.createElement("button", { className: "cat-edit-btn", onClick: function() { setCatEditId(selCategory.id); setCatEditName(selCategory.name); setCatEditShort(selCategory.short_name); setCatEditModal(true); } }, "\u7F16\u8F91")
+        ),
+        selCategory.steps.length === 0 ? React.createElement("div", { style: { textAlign: 'center', padding: '40px 0', color: '#64748b', fontSize: '14px', fontWeight: 500 } }, "\u6682\u65E0\u5DE5\u6B65") :
+        selCategory.steps.map(function(step) {
+          return React.createElement("div", { key: step.seq, className: "customize-step-card", onClick: function() { setSelStepSeq(step.seq); setIsNewStep(false); setEditSeq(String(step.seq)); setEditName(step.name); setEditScore(String(step.score)); setEditUnit(step.unit || ''); setLevel('edit'); } },
+            React.createElement("div", { className: "customize-step-seq" }, step.seq),
+            React.createElement("div", { className: "customize-step-info" },
+              React.createElement("div", { className: "customize-step-name" }, step.name),
+              React.createElement("div", { className: "customize-step-sub" }, (step.unit ? '\u6BCF' + step.unit + ' \xB7 ' : '') + '\u5DE5\u5206 ' + step.score)
+            ),
+            React.createElement("div", { className: "customize-arrow" }, "\u203A")
+          );
+        }),
+        React.createElement("button", { className: "add-cat-btn", onClick: function() { setIsNewStep(true); setEditSeq(String(Date.now())); setEditName(''); setEditScore(''); setEditUnit(''); setLevel('edit'); } },
+          React.createElement("span", { className: "add-cat-btn-text" }, "+ \u65B0\u589E\u5DE5\u6B65")
+        ),
+        React.createElement("button", { className: "delete-cat-btn", onClick: function() { confirmFn('\u786E\u5B9A\u5220\u9664\u5DE5\u79CD"' + selCategory.short_name + '"\u53CA\u5176\u6240\u6709\u5DE5\u6B65\u5417\uFF1F', function() { dispatch({ type: 'DELETE_CATEGORY', payload: { id: selCategory.id } }); setLevel('list'); setSelCategoryId(null); }); } }, "\u5220\u9664\u8BE5\u5DE5\u79CD")
+      ) : null,
+
+      level === 'edit' ? React.createElement("div", { style: { padding: 4 } },
+        React.createElement("div", { className: "form-group" },
+          React.createElement("div", { className: "form-label" }, "\u5E8F\u53F7"),
+          React.createElement("input", { className: "form-input", value: editSeq, onChange: function(e) { setEditSeq(e.target.value); }, placeholder: "\u8F93\u5165\u5E8F\u53F7" })
+        ),
+        React.createElement("div", { className: "form-group" },
+          React.createElement("div", { className: "form-label" }, "\u540D\u79F0"),
+          React.createElement("textarea", { className: "form-input form-input-multi", value: editName, onChange: function(e) { setEditName(e.target.value); }, placeholder: "\u8F93\u5165\u5DE5\u6B65\u540D\u79F0" })
+        ),
+        React.createElement("div", { className: "form-group" },
+          React.createElement("div", { className: "form-label" }, "\u5DE5\u5206"),
+          React.createElement("input", { className: "form-input", value: editScore, onChange: function(e) { setEditScore(e.target.value); }, placeholder: "\u8F93\u5165\u5DE5\u5206\u503C" })
+        ),
+        React.createElement("div", { className: "form-group" },
+          React.createElement("div", { className: "form-label" }, "\u5355\u4F4D"),
+          React.createElement("input", { className: "form-input", value: editUnit, onChange: function(e) { setEditUnit(e.target.value); }, placeholder: "\u5982\uFF1A\u4E2A\u3001\u53F0\u3001\u6839\uFF08\u53EF\u7A7A\uFF09" })
+        ),
+        React.createElement("div", { className: "edit-actions" },
+          !isNewStep ? React.createElement("button", { className: "delete-step-btn", onClick: function() { confirmFn('\u786E\u5B9A\u5220\u9664\u8BE5\u5DE5\u6B65\u5417\uFF1F', function() { dispatch({ type: 'DELETE_STEP', payload: { categoryId: selCategoryId, seq: selStepSeq } }); setLevel('steps'); }); } }, "\u5220\u9664") : null,
+          React.createElement("button", { className: "save-step-btn", disabled: !canSave, onClick: handleSave }, "\u4FDD\u5B58")
+        )
+      ) : null
+    ),
+
+    catEditModal ? React.createElement("div", { className: "modal-overlay", onClick: function() { setCatEditModal(false); } },
+      React.createElement("div", { className: "modal-content", onClick: function(e) { e.stopPropagation(); } },
+        React.createElement("div", { className: "modal-title" }, "\u7F16\u8F91\u5DE5\u79CD"),
+        React.createElement("div", { className: "modal-label" }, "\u5168\u79F0"),
+        React.createElement("input", { className: "modal-input", value: catEditName, onChange: function(e) { setCatEditName(e.target.value); } }),
+        React.createElement("div", { className: "modal-label" }, "\u7B80\u79F0"),
+        React.createElement("input", { className: "modal-input", value: catEditShort, onChange: function(e) { setCatEditShort(e.target.value); } }),
+        React.createElement("div", { className: "modal-actions" },
+          React.createElement("button", { className: "modal-cancel-btn", onClick: function() { setCatEditModal(false); } }, "\u53D6\u6D88"),
+          React.createElement("button", { className: "modal-save-btn", onClick: function() { dispatch({ type: 'UPDATE_CATEGORY', payload: { id: catEditId, updates: { name: catEditName.trim(), short_name: catEditShort.trim() } } }); setCatEditModal(false); } }, "\u4FDD\u5B58")
+        )
+      )
+    ) : null,
+
+    addCatModal ? React.createElement("div", { className: "modal-overlay", onClick: function() { setAddCatModal(false); } },
+      React.createElement("div", { className: "modal-content", onClick: function(e) { e.stopPropagation(); } },
+        React.createElement("div", { className: "modal-title" }, "\u65B0\u589E\u5DE5\u79CD"),
+        React.createElement("div", { className: "modal-label" }, "\u5168\u79F0"),
+        React.createElement("input", { className: "modal-input", value: newCatName, onChange: function(e) { setNewCatName(e.target.value); }, autoFocus: true }),
+        React.createElement("div", { className: "modal-label" }, "\u7B80\u79F0"),
+        React.createElement("input", { className: "modal-input", value: newCatShort, onChange: function(e) { setNewCatShort(e.target.value); } }),
+        React.createElement("div", { className: "modal-actions" },
+          React.createElement("button", { className: "modal-cancel-btn", onClick: function() { setAddCatModal(false); } }, "\u53D6\u6D88"),
+          React.createElement("button", { className: "modal-save-btn", disabled: !newCatName.trim() || !newCatShort.trim(), onClick: function() { dispatch({ type: 'ADD_CATEGORY', payload: { name: newCatName.trim(), short_name: newCatShort.trim() } }); setAddCatModal(false); } }, "\u521B\u5EFA")
+        )
+      )
+    ) : null
+  );
+}
 function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [page, setPage] = useState({
@@ -3969,6 +4197,10 @@ function App() {
         payload: JSON.parse(h)
       });
     } catch (e) {}
+    const customJson = localStorage.getItem('workscore_custom_categories');
+    if (customJson) {
+      dispatch({ type: 'LOAD_CATEGORIES', payload: JSON.parse(customJson) });
+    }
     setLoaded(true);
   }, []);
   useEffect(() => {
@@ -3978,6 +4210,11 @@ function App() {
       } catch (e) {}
     }
   }, [state.history, loaded]);
+  useEffect(() => {
+    if (loaded) {
+      localStorage.setItem('workscore_custom_categories', JSON.stringify(state.categories));
+    }
+  }, [state.categories, loaded]);
   const ctx = {
     ...state,
     dispatch,
@@ -3988,7 +4225,7 @@ function App() {
       if (!keyword || keyword.trim() === '') return [];
       const kw = keyword.trim().toLowerCase();
       const results = [];
-      for (const category of WORK_SCORES.categories) {
+      for (const category of state.categories) {
         for (const step of category.steps) {
           if (String(step.seq).includes(kw) || step.name.toLowerCase().includes(kw)) {
             results.push({
@@ -4001,9 +4238,9 @@ function App() {
       }
       return results;
     },
-    getCategoryById: id => WORK_SCORES.categories.find(c => c.id === id),
+    getCategoryById: id => state.categories.find(c => c.id === id),
     getGroupById: id => state.workGroups.find(g => g.id === id),
-    categories: WORK_SCORES.categories,
+    categories: state.categories,
     navigate: setPage,
     goBack: () => setPage({
       name: 'home'
@@ -4022,6 +4259,9 @@ function App() {
   if (page.name === 'output') return /*#__PURE__*/React.createElement(OutputScreen, {
     ctx: ctx
   });
+  if (page.name === 'customize') return page.name === 'customize' ? /*#__PURE__*/React.createElement(CustomizeScreen, {
+    ctx: ctx
+  }) : null;
   return /*#__PURE__*/React.createElement(HomeScreen, {
     ctx: ctx
   });
