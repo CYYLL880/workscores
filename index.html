@@ -4121,12 +4121,25 @@ async function ghUploadCategories(token, categories) {
 }
 
 async function ghDownloadCategories(token) {
-  var resp = await ghApiCall('GET', '/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_FILE, token);
-  if (resp.status === 404) return null;
-  if (resp.status !== 200) throw new Error('下载失败: ' + resp.status);
-  var content = decodeURIComponent(escape(atob(resp.data.content.replace(/\n/g, ''))));
-  var data = JSON.parse(content);
-  return data.categories || null;
+  // 公开仓库可通过 raw.githubusercontent.com 无需 Token 下载
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://raw.githubusercontent.com/' + GH_OWNER + '/' + GH_REPO + '/main/' + GH_FILE, true);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          resolve(data.categories || null);
+        } catch(e) { resolve(null); }
+      } else if (xhr.status === 404) {
+        resolve(null);
+      } else {
+        resolve(null);
+      }
+    };
+    xhr.onerror = function() { resolve(null); };
+    xhr.send();
+  });
 }
 
 function CustomizeScreen(_ref) {
@@ -4174,11 +4187,9 @@ function CustomizeScreen(_ref) {
   };
 
   var handleSyncDownload = async function() {
-    var token = localStorage.getItem('gh_token');
-    if (!token) { setTokenInput(''); setTokenModal(true); return; }
     setSyncStatus('syncing');
     try {
-      var remoteCats = await ghDownloadCategories(token);
+      var remoteCats = await ghDownloadCategories();
       if (remoteCats) {
         dispatch({ type: 'LOAD_CATEGORIES', payload: remoteCats });
         setSyncStatus('success');
@@ -4362,15 +4373,12 @@ function App() {
       dispatch({ type: 'LOAD_CATEGORIES', payload: JSON.parse(customJson) });
     }
     setLoaded(true);
-    // 后台从 GitHub 拉取最新工分数据
-    var ghToken = localStorage.getItem('gh_token');
-    if (ghToken) {
-      ghDownloadCategories(ghToken).then(function(remoteCats) {
-        if (remoteCats) {
-          dispatch({ type: 'LOAD_CATEGORIES', payload: remoteCats });
-        }
-      }).catch(function(e) {});
-    }
+    // 后台从 GitHub 拉取最新工分数据（无需 Token）
+    ghDownloadCategories().then(function(remoteCats) {
+      if (remoteCats) {
+        dispatch({ type: 'LOAD_CATEGORIES', payload: remoteCats });
+      }
+    }).catch(function(e) {});
   }, []);
   useEffect(() => {
     if (loaded) {
