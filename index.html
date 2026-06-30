@@ -122,7 +122,15 @@
   .history-meta { font-size: 12px; color: #64748b; margin-top: 3px; font-weight: 500; }
   .history-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .reuse-btn { background: #eff6ff; padding: 8px 14px; border-radius: 8px; color: #3b82f6; font-size: 12px; font-weight: 700; }
+  .exclude-btn { background: #fff7ed; padding: 8px 12px; border-radius: 8px; color: #f97316; font-size: 12px; font-weight: 700; }
   .history-del-btn { width: 28px; height: 28px; border-radius: 8px; background: #fee2e2; color: #ef4444; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+  /* Exclude mode banner */
+  .exclude-banner { background: #f97316; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
+  .exclude-banner-text { color: #fff; font-size: 12px; font-weight: 600; flex: 1; }
+  .exit-exclude-btn { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700; margin-left: 10px; flex-shrink: 0; }
+  .add-btn-disabled { width: 30px; height: 30px; border-radius: 10px; background: #0f172a; color: #fff; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 4px; opacity: 0.4; }
+  .search-item.excluded, .step-item.excluded { opacity: 0.55; }
 
   /* Empty state */
   .empty-state { padding: 60px 0; text-align: center; }
@@ -2800,7 +2808,9 @@ function calculateTotalScore(workGroups) {
 const genId = () => 'group_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 const initialState = {
   workGroups: [],
-  history: []
+  history: [],
+  excludeMode: false,
+  excludedSeqs: []
 };
 function appReducer(state, action) {
   switch (action.type) {
@@ -2925,6 +2935,18 @@ function appReducer(state, action) {
         ...state,
         history: action.payload
       };
+    case 'ENTER_EXCLUDE_MODE':
+      return {
+        ...state,
+        excludeMode: true,
+        excludedSeqs: action.payload || []
+      };
+    case 'EXIT_EXCLUDE_MODE':
+      return {
+        ...state,
+        excludeMode: false,
+        excludedSeqs: []
+      };
     case 'ADD_HISTORY':
       return {
         ...state,
@@ -2979,6 +3001,7 @@ function HomeScreen({
   const [activeTab, setActiveTab] = useState('groups');
   const workGroupsRef = useRef(workGroups);
   workGroupsRef.current = workGroups;
+  const pendingExcludeNav = useRef(false);
   const handleCreateGroup = () => {
     dispatch({
       type: 'ADD_WORK_GROUP',
@@ -3038,6 +3061,34 @@ function HomeScreen({
       });
     }
   };
+  const onExclude = record => {
+    if (record.workGroups && record.workGroups.length > 0) {
+      const seqs = [];
+      record.workGroups.forEach(g => {
+        (g.items || []).forEach(it => {
+          if (!seqs.includes(it.seq)) seqs.push(it.seq);
+        });
+      });
+      dispatch({
+        type: 'RESTORE_WORK_GROUPS',
+        payload: record.workGroups
+      });
+      dispatch({
+        type: 'ENTER_EXCLUDE_MODE',
+        payload: seqs
+      });
+      pendingExcludeNav.current = true;
+    }
+  };
+  useEffect(() => {
+    if (pendingExcludeNav.current && workGroups.length > 0) {
+      pendingExcludeNav.current = false;
+      ctx.navigate({
+        name: 'edit',
+        groupId: workGroups[0].id
+      });
+    }
+  }, [workGroups]);
   const totalScore = getTotalScore();
   const totalCount = getTotalItemCount();
   return /*#__PURE__*/React.createElement("div", {
@@ -3130,6 +3181,9 @@ function HomeScreen({
       className: "reuse-btn",
       onClick: () => onReuse(item)
     }, "\u590D\u7528"), /*#__PURE__*/React.createElement("button", {
+      className: "exclude-btn",
+      onClick: () => onExclude(item)
+    }, "\u6392\u9664"), /*#__PURE__*/React.createElement("button", {
       className: "history-del-btn",
       onClick: () => onDeleteHistory(item.id)
     }, "\u2715")));
@@ -3156,7 +3210,9 @@ function WorkGroupEditScreen({
     dispatch,
     getGroupById,
     getGroupScore,
-    searchSteps
+    searchSteps,
+    excludeMode,
+    excludedSeqs
   } = ctx;
   const group = getGroupById(groupId);
   const [trainInput, setTrainInput] = useState(group ? group.train : '');
@@ -3226,6 +3282,12 @@ function WorkGroupEditScreen({
   const searchResults = searchKeyword.trim() ? searchSteps(searchKeyword) : [];
   const hasSearch = searchKeyword.trim().length > 0;
   const isInGroup = seq => group.items.some(it => it.seq === seq);
+  const isExcluded = seq => excludeMode && excludedSeqs.includes(seq);
+  const handleExitExcludeMode = () => {
+    dispatch({
+      type: 'EXIT_EXCLUDE_MODE'
+    });
+  };
   const handleAddStep = step => {
     const category = categories.find(c => c.id === step.categoryId);
     dispatch({
@@ -3385,7 +3447,14 @@ function WorkGroupEditScreen({
   }, "\u4E34\u4FEE"), /*#__PURE__*/React.createElement(Switch, {
     on: isLinxiu,
     onChange: handleLinxiuChange
-  }))), /*#__PURE__*/React.createElement("div", {
+  }))), excludeMode ? /*#__PURE__*/React.createElement("div", {
+    className: "exclude-banner"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "exclude-banner-text"
+  }, "\u6392\u9664\u6A21\u5F0F \xB7 \u5DF2\u9009\u8FC7\u7684\u9879\u70B9\u4E0D\u53EF\u91CD\u590D\u6DFB\u52A0"), /*#__PURE__*/React.createElement("button", {
+    className: "exit-exclude-btn",
+    onClick: handleExitExcludeMode
+  }, "\u9000\u51FA\u6A21\u5F0F")) : null, /*#__PURE__*/React.createElement("div", {
     className: "body"
   }, /*#__PURE__*/React.createElement("div", {
     className: "searchbar"
@@ -3404,8 +3473,9 @@ function WorkGroupEditScreen({
     className: "empty-text"
   }, "\u672A\u627E\u5230\u5339\u914D\u5DE5\u6B65")) : searchResults.map(item => {
     const inGroup = isInGroup(item.seq);
+    const excluded = isExcluded(item.seq);
     return /*#__PURE__*/React.createElement("div", {
-      className: 'search-item' + (inGroup ? ' in-group' : ''),
+      className: 'search-item' + (inGroup ? ' in-group' : '') + (excluded ? ' excluded' : ''),
       key: item.seq
     }, /*#__PURE__*/React.createElement("div", {
       className: "search-seq"
@@ -3423,7 +3493,9 @@ function WorkGroupEditScreen({
       className: "search-score"
     }, formatScore(item.score)), inGroup ? /*#__PURE__*/React.createElement("div", {
       className: "added-text"
-    }, "\u5DF2\u9009") : /*#__PURE__*/React.createElement("button", {
+    }, "\u5DF2\u9009") : excluded ? /*#__PURE__*/React.createElement("div", {
+      className: "add-btn-disabled"
+    }, "+") : /*#__PURE__*/React.createElement("button", {
       className: "add-btn",
       onClick: () => handleAddStep(item)
     }, "+")));
@@ -3652,7 +3724,9 @@ function CategoryDetailScreen({
     getCategoryById,
     getGroupById,
     dispatch,
-    getGroupScore
+    getGroupScore,
+    excludeMode,
+    excludedSeqs
   } = ctx;
   const [searchKeyword, setSearchKeyword] = useState('');
   const category = getCategoryById(categoryId);
@@ -3680,6 +3754,12 @@ function CategoryDetailScreen({
   const kw = searchKeyword.trim().toLowerCase();
   const filteredSteps = kw ? category.steps.filter(step => String(step.seq).includes(kw) || step.name.toLowerCase().includes(kw)) : category.steps;
   const isInGroup = seq => group ? group.items.some(item => item.seq === seq) : false;
+  const isExcluded = seq => excludeMode && excludedSeqs.includes(seq);
+  const handleExitExcludeMode = () => {
+    dispatch({
+      type: 'EXIT_EXCLUDE_MODE'
+    });
+  };
   const handleAddStep = step => {
     if (!group) return;
     dispatch({
@@ -3704,7 +3784,14 @@ function CategoryDetailScreen({
     className: "nav-title"
   }, category.short_name), /*#__PURE__*/React.createElement("div", {
     className: "nav-count"
-  }, category.steps.length, "\u9879")), /*#__PURE__*/React.createElement("div", {
+  }, category.steps.length, "\u9879")), excludeMode ? /*#__PURE__*/React.createElement("div", {
+    className: "exclude-banner"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "exclude-banner-text"
+  }, "\u6392\u9664\u6A21\u5F0F \xB7 \u5DF2\u9009\u8FC7\u7684\u9879\u70B9\u4E0D\u53EF\u91CD\u590D\u6DFB\u52A0"), /*#__PURE__*/React.createElement("button", {
+    className: "exit-exclude-btn",
+    onClick: handleExitExcludeMode
+  }, "\u9000\u51FA\u6A21\u5F0F")) : null, /*#__PURE__*/React.createElement("div", {
     className: "searchbar"
   }, /*#__PURE__*/React.createElement("input", {
     className: "search-input",
@@ -3722,9 +3809,10 @@ function CategoryDetailScreen({
     className: "empty-text"
   }, "\u672A\u627E\u5230\u5339\u914D\u5DE5\u6B65")) : filteredSteps.map(item => {
     const inGroup = isInGroup(item.seq);
+    const excluded = isExcluded(item.seq);
     const unitText = item.unit ? '每' + item.unit : '无单位';
     return /*#__PURE__*/React.createElement("div", {
-      className: 'step-item' + (inGroup ? ' in-group' : ''),
+      className: 'step-item' + (inGroup ? ' in-group' : '') + (excluded ? ' excluded' : ''),
       key: item.seq
     }, /*#__PURE__*/React.createElement("div", {
       className: "step-seq-tag"
@@ -3738,7 +3826,9 @@ function CategoryDetailScreen({
       className: "step-sub"
     }, unitText, " \xB7 \u5DE5\u5206 ", formatScore(item.score))), inGroup ? /*#__PURE__*/React.createElement("div", {
       className: "added-text"
-    }, "\u5DF2\u9009") : /*#__PURE__*/React.createElement("button", {
+    }, "\u5DF2\u9009") : excluded ? /*#__PURE__*/React.createElement("div", {
+      className: "add-btn-disabled"
+    }, "+") : /*#__PURE__*/React.createElement("button", {
       className: "step-add-btn",
       onClick: () => handleAddStep(item)
     }, "+"));
