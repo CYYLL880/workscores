@@ -3069,6 +3069,9 @@ function HomeScreen({
     history
   } = ctx;
   const [activeTab, setActiveTab] = useState('groups');
+  var _pwdState = useState(false), pwdModal = _pwdState[0], setPwdModal = _pwdState[1];
+  var _pwdInputState = useState(''), pwdInput = _pwdInputState[0], setPwdInput = _pwdInputState[1];
+  var CUSTOMIZE_PWD = 'DZZGF20260630';
   const workGroupsRef = useRef(workGroups);
   workGroupsRef.current = workGroups;
   const pendingExcludeNav = useRef(false);
@@ -3178,7 +3181,7 @@ function HomeScreen({
     className: "header-subtitle"
   }, "2026\u5E74\u7535\u5B50\u7EC4\u5DE5\u5206\u7EC6\u5219")), /*#__PURE__*/React.createElement("button", {
     className: "gear-btn",
-    onClick: () => ctx.navigate({ name: 'customize' })
+    onClick: () => { setPwdInput(''); setPwdModal(true); }
   }, "\u2699")), /*#__PURE__*/React.createElement("div", {
     className: "body"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3279,7 +3282,48 @@ function HomeScreen({
     className: "btn-green",
     disabled: workGroups.length === 0 || totalCount === 0,
     onClick: handleGenerate
-  }, "\u751F\u6210\u6587\u5B57")));
+  }, "\u751F\u6210\u6587\u5B57"))), pwdModal ? /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    onClick: function onClick() {
+      setPwdModal(false);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-content",
+    onClick: function onClick(e) {
+      e.stopPropagation();
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-title"
+  }, "\u8BF7\u8F93\u5165\u5BC6\u7801"), /*#__PURE__*/React.createElement("input", {
+    className: "modal-input",
+    type: "password",
+    value: pwdInput,
+    onChange: function onChange(e) {
+      setPwdInput(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u7BA1\u7406\u5BC6\u7801",
+    autoFocus: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "modal-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "modal-cancel-btn",
+    onClick: function onClick() {
+      setPwdModal(false);
+    }
+  }, "\u53D6\u6D88"), /*#__PURE__*/React.createElement("button", {
+    className: "modal-save-btn",
+    disabled: !pwdInput,
+    onClick: function onClick() {
+      if (pwdInput === CUSTOMIZE_PWD) {
+        setPwdModal(false);
+        ctx.navigate({
+          name: 'customize'
+        });
+      } else {
+        window.alert('\u5BC6\u7801\u9519\u8BEF');
+      }
+    }
+  }, "\u786E\u8BA4")))) : null);
 }
 function WorkGroupEditScreen({
   ctx,
