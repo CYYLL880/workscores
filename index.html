@@ -180,6 +180,7 @@
 .sync-btn.syncing { background: #f1f5f9; color: #64748b; }
 .sync-btn.success { background: #d1fae5; color: #10b981; }
 .sync-btn.error { background: #fee2e2; color: #ef4444; }
+.sync-btn.empty { background: #fef3c7; color: #d97706; }
 .sync-btn-download { background: #f0fdf4; color: #10b981; }
 .sync-btn-token { flex: 0.8; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
 
@@ -4120,24 +4121,28 @@ async function ghUploadCategories(token, categories) {
   return true;
 }
 
-async function ghDownloadCategories(token) {
-  // 公开仓库可通过 raw.githubusercontent.com 无需 Token 下载
-  return new Promise(function(resolve, reject) {
+async function ghDownloadCategories() {
+  // 公开仓库通过 GitHub API 下载，无需 Token
+  // 返回 { status: 'ok'|'empty'|'error', categories: null|array }
+  return new Promise(function(resolve) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://raw.githubusercontent.com/' + GH_OWNER + '/' + GH_REPO + '/main/' + GH_FILE, true);
+    xhr.open('GET', 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_FILE, true);
+    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
     xhr.onload = function() {
       if (xhr.status === 200) {
         try {
-          var data = JSON.parse(xhr.responseText);
-          resolve(data.categories || null);
-        } catch(e) { resolve(null); }
+          var resp = JSON.parse(xhr.responseText);
+          var content = decodeURIComponent(escape(atob(resp.content.replace(/\n/g, ''))));
+          var data = JSON.parse(content);
+          resolve({ status: 'ok', categories: data.categories || null });
+        } catch(e) { resolve({ status: 'error', categories: null }); }
       } else if (xhr.status === 404) {
-        resolve(null);
+        resolve({ status: 'empty', categories: null });
       } else {
-        resolve(null);
+        resolve({ status: 'error', categories: null });
       }
     };
-    xhr.onerror = function() { resolve(null); };
+    xhr.onerror = function() { resolve({ status: 'error', categories: null }); };
     xhr.send();
   });
 }
@@ -4189,14 +4194,16 @@ function CustomizeScreen(_ref) {
   var handleSyncDownload = async function() {
     setSyncStatus('syncing');
     try {
-      var remoteCats = await ghDownloadCategories();
-      if (remoteCats) {
-        dispatch({ type: 'LOAD_CATEGORIES', payload: remoteCats });
+      var result = await ghDownloadCategories();
+      if (result.status === 'ok' && result.categories) {
+        dispatch({ type: 'LOAD_CATEGORIES', payload: result.categories });
         setSyncStatus('success');
+      } else if (result.status === 'empty') {
+        setSyncStatus('empty');
       } else {
         setSyncStatus('error');
       }
-      setTimeout(function() { setSyncStatus(''); }, 2000);
+      setTimeout(function() { setSyncStatus(''); }, 2500);
     } catch(e) {
       setSyncStatus('error');
       setTimeout(function() { setSyncStatus(''); }, 3000);
@@ -4244,7 +4251,7 @@ function CustomizeScreen(_ref) {
           React.createElement("button", { className: "reset-btn", onClick: function() { confirmFn('\u6062\u590D\u9ED8\u8BA4\u5C06\u6E05\u9664\u6240\u6709\u81EA\u5B9A\u4E49\u4FEE\u6539\uFF0C\u786E\u5B9A\u5417\uFF1F', function() { dispatch({ type: 'RESET_CATEGORIES' }); }) } }, "\u6062\u590D\u9ED8\u8BA4")
         ),
         React.createElement("div", { className: "sync-bar" },
-          React.createElement("button", { className: "sync-btn " + (syncStatus === 'syncing' ? 'syncing' : syncStatus === 'success' ? 'success' : syncStatus === 'error' ? 'error' : ''), onClick: handleSyncUpload, disabled: syncStatus === 'syncing' }, syncStatus === 'syncing' ? '\u540C\u6B65\u4E2D...' : syncStatus === 'success' ? '\u2713 \u5DF2\u4E0A\u4F20' : syncStatus === 'error' ? '\u2715 \u5931\u8D25' : '\u2191 \u4E0A\u4F20\u5230\u4E91\u7AEF'),
+          React.createElement("button", { className: "sync-btn " + (syncStatus === 'syncing' ? 'syncing' : syncStatus === 'success' ? 'success' : syncStatus === 'error' ? 'error' : syncStatus === 'empty' ? 'empty' : ''), onClick: handleSyncUpload, disabled: syncStatus === 'syncing' }, syncStatus === 'syncing' ? '\u540C\u6B65\u4E2D...' : syncStatus === 'success' ? '\u2713 \u5DF2\u4E0A\u4F20' : syncStatus === 'error' ? '\u2715 \u5931\u8D25' : syncStatus === 'empty' ? '\u4E91\u7AEF\u65E0\u6570\u636E' : '\u2191 \u4E0A\u4F20\u5230\u4E91\u7AEF'),
           React.createElement("button", { className: "sync-btn sync-btn-download", onClick: handleSyncDownload, disabled: syncStatus === 'syncing' }, "\u2193 \u4ECE\u4E91\u7AEF\u62C9\u53D6"),
           React.createElement("button", { className: "sync-btn sync-btn-token", onClick: function() { setTokenInput(localStorage.getItem('gh_token') || ''); setTokenModal(true); } }, hasToken ? '\u2713 Token' : '\u8BBE\u7F6E Token')
         ),
@@ -4374,9 +4381,9 @@ function App() {
     }
     setLoaded(true);
     // 后台从 GitHub 拉取最新工分数据（无需 Token）
-    ghDownloadCategories().then(function(remoteCats) {
-      if (remoteCats) {
-        dispatch({ type: 'LOAD_CATEGORIES', payload: remoteCats });
+    ghDownloadCategories().then(function(result) {
+      if (result.status === 'ok' && result.categories) {
+        dispatch({ type: 'LOAD_CATEGORIES', payload: result.categories });
       }
     }).catch(function(e) {});
   }, []);
