@@ -174,6 +174,14 @@
 .modal-cancel-btn { flex: 1; padding: 12px 0; text-align: center; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; color: #64748b; font-size: 14px; font-weight: 600; cursor: pointer; }
 .modal-save-btn { flex: 1; padding: 12px 0; text-align: center; background: #3b82f6; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 700; border: none; cursor: pointer; }
 .modal-save-btn:disabled { opacity: 0.4; }
+.sync-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+.sync-btn { flex: 1; padding: 10px 0; border-radius: 10px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; background: #eff6ff; color: #3b82f6; }
+.sync-btn:disabled { opacity: 0.5; cursor: default; }
+.sync-btn.syncing { background: #f1f5f9; color: #64748b; }
+.sync-btn.success { background: #d1fae5; color: #10b981; }
+.sync-btn.error { background: #fee2e2; color: #ef4444; }
+.sync-btn-download { background: #f0fdf4; color: #10b981; }
+.sync-btn-token { flex: 0.8; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
 
   /* Empty state */
   .empty-state { padding: 60px 0; text-align: center; }
@@ -4074,6 +4082,53 @@ function OutputScreen({
     onClick: handleComplete
   }, "\u5B8C\u6210\u5E76\u4FDD\u5B58")));
 }
+// GitHub 仓库同步
+var GH_OWNER = 'CYYLL880';
+var GH_REPO = 'workscores';
+var GH_FILE = 'work_scores_custom.json';
+
+function ghApiCall(method, path, token, body) {
+  return new Promise(function(resolve, reject) {
+    var data = body ? JSON.stringify(body) : null;
+    var xhr = new XMLHttpRequest();
+    xhr.open(method, 'https://api.github.com' + path, true);
+    xhr.setRequestHeader('Authorization', 'token ' + token);
+    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+      try {
+        var resp = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+        resolve({ status: xhr.status, data: resp });
+      } catch(e) {
+        resolve({ status: xhr.status, data: xhr.responseText });
+      }
+    };
+    xhr.onerror = function() { reject(new Error('网络错误')); };
+    if (data) xhr.send(data); else xhr.send();
+  });
+}
+
+async function ghUploadCategories(token, categories) {
+  // 先获取现有文件的 sha（如果存在）
+  var getResp = await ghApiCall('GET', '/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_FILE, token);
+  var sha = (getResp.status === 200) ? getResp.data.sha : null;
+  var content = btoa(unescape(encodeURIComponent(JSON.stringify({ version: 'custom', categories: categories }))));
+  var body = { message: '更新工分数据', content: content };
+  if (sha) body.sha = sha;
+  var putResp = await ghApiCall('PUT', '/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_FILE, token, body);
+  if (putResp.status !== 200 && putResp.status !== 201) throw new Error('上传失败: ' + putResp.status);
+  return true;
+}
+
+async function ghDownloadCategories(token) {
+  var resp = await ghApiCall('GET', '/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_FILE, token);
+  if (resp.status === 404) return null;
+  if (resp.status !== 200) throw new Error('下载失败: ' + resp.status);
+  var content = decodeURIComponent(escape(atob(resp.data.content.replace(/\n/g, ''))));
+  var data = JSON.parse(content);
+  return data.categories || null;
+}
+
 function CustomizeScreen(_ref) {
   var ctx = _ref.ctx;
   var categories = ctx.categories, dispatch = ctx.dispatch;
@@ -4092,11 +4147,56 @@ function CustomizeScreen(_ref) {
   var _useState13 = useState(''), editName = _useState13[0], setEditName = _useState13[1];
   var _useState14 = useState(''), editScore = _useState14[0], setEditScore = _useState14[1];
   var _useState15 = useState(''), editUnit = _useState15[0], setEditUnit = _useState15[1];
+  var _useState16 = useState(false), tokenModal = _useState16[0], setTokenModal = _useState16[1];
+  var _useState17 = useState(localStorage.getItem('gh_token') || ''), tokenInput = _useState17[0], setTokenInput = _useState17[1];
+  var _useState18 = useState(''), syncStatus = _useState18[0], setSyncStatus = _useState18[1];
 
   var selCategory = categories.find(function(c) { return c.id === selCategoryId; });
 
   var confirmFn = function(msg, onConfirm) {
     if (window.confirm(msg)) onConfirm();
+  };
+
+  var hasToken = !!localStorage.getItem('gh_token');
+
+  var handleSyncUpload = async function() {
+    var token = localStorage.getItem('gh_token');
+    if (!token) { setTokenInput(''); setTokenModal(true); return; }
+    setSyncStatus('syncing');
+    try {
+      await ghUploadCategories(token, categories);
+      setSyncStatus('success');
+      setTimeout(function() { setSyncStatus(''); }, 2000);
+    } catch(e) {
+      setSyncStatus('error');
+      setTimeout(function() { setSyncStatus(''); }, 3000);
+    }
+  };
+
+  var handleSyncDownload = async function() {
+    var token = localStorage.getItem('gh_token');
+    if (!token) { setTokenInput(''); setTokenModal(true); return; }
+    setSyncStatus('syncing');
+    try {
+      var remoteCats = await ghDownloadCategories(token);
+      if (remoteCats) {
+        dispatch({ type: 'LOAD_CATEGORIES', payload: remoteCats });
+        setSyncStatus('success');
+      } else {
+        setSyncStatus('error');
+      }
+      setTimeout(function() { setSyncStatus(''); }, 2000);
+    } catch(e) {
+      setSyncStatus('error');
+      setTimeout(function() { setSyncStatus(''); }, 3000);
+    }
+  };
+
+  var handleSaveToken = function() {
+    if (tokenInput.trim()) {
+      localStorage.setItem('gh_token', tokenInput.trim());
+      setTokenModal(false);
+    }
   };
 
   var goBack = function() {
@@ -4131,6 +4231,11 @@ function CustomizeScreen(_ref) {
         React.createElement("div", { className: "tip-bar" },
           React.createElement("div", { className: "tip-text" }, "\u70B9\u51FB\u5DE5\u79CD\u67E5\u770B\u5DE5\u6B65\uFF0C\u53EF\u589E\u5220\u6539\u6240\u6709\u5C5E\u6027"),
           React.createElement("button", { className: "reset-btn", onClick: function() { confirmFn('\u6062\u590D\u9ED8\u8BA4\u5C06\u6E05\u9664\u6240\u6709\u81EA\u5B9A\u4E49\u4FEE\u6539\uFF0C\u786E\u5B9A\u5417\uFF1F', function() { dispatch({ type: 'RESET_CATEGORIES' }); }) } }, "\u6062\u590D\u9ED8\u8BA4")
+        ),
+        React.createElement("div", { className: "sync-bar" },
+          React.createElement("button", { className: "sync-btn " + (syncStatus === 'syncing' ? 'syncing' : syncStatus === 'success' ? 'success' : syncStatus === 'error' ? 'error' : ''), onClick: handleSyncUpload, disabled: syncStatus === 'syncing' }, syncStatus === 'syncing' ? '\u540C\u6B65\u4E2D...' : syncStatus === 'success' ? '\u2713 \u5DF2\u4E0A\u4F20' : syncStatus === 'error' ? '\u2715 \u5931\u8D25' : '\u2191 \u4E0A\u4F20\u5230\u4E91\u7AEF'),
+          React.createElement("button", { className: "sync-btn sync-btn-download", onClick: handleSyncDownload, disabled: syncStatus === 'syncing' }, "\u2193 \u4ECE\u4E91\u7AEF\u62C9\u53D6"),
+          React.createElement("button", { className: "sync-btn sync-btn-token", onClick: function() { setTokenInput(localStorage.getItem('gh_token') || ''); setTokenModal(true); } }, hasToken ? '\u2713 Token' : '\u8BBE\u7F6E Token')
         ),
         categories.map(function(cat) {
           return React.createElement("div", { key: cat.id, className: "customize-card", onClick: function() { setSelCategoryId(cat.id); setLevel('steps'); } },
@@ -4224,6 +4329,17 @@ function CustomizeScreen(_ref) {
           React.createElement("button", { className: "modal-save-btn", disabled: !newCatName.trim() || !newCatShort.trim(), onClick: function() { dispatch({ type: 'ADD_CATEGORY', payload: { name: newCatName.trim(), short_name: newCatShort.trim() } }); setAddCatModal(false); } }, "\u521B\u5EFA")
         )
       )
+    ) : null,
+    tokenModal ? React.createElement("div", { className: "modal-overlay", onClick: function() { setTokenModal(false); } },
+      React.createElement("div", { className: "modal-content", onClick: function(e) { e.stopPropagation(); } },
+        React.createElement("div", { className: "modal-title" }, "\u8BBE\u7F6E GitHub Token"),
+        React.createElement("div", { className: "modal-label" }, "Personal Access Token"),
+        React.createElement("input", { className: "modal-input", value: tokenInput, onChange: function(e) { setTokenInput(e.target.value); }, placeholder: "ghp_...", autoFocus: true }),
+        React.createElement("div", { className: "modal-actions" },
+          React.createElement("button", { className: "modal-cancel-btn", onClick: function() { setTokenModal(false); } }, "\u53D6\u6D88"),
+          React.createElement("button", { className: "modal-save-btn", disabled: !tokenInput.trim(), onClick: handleSaveToken }, "\u4FDD\u5B58")
+        )
+      )
     ) : null
   );
 }
@@ -4246,6 +4362,15 @@ function App() {
       dispatch({ type: 'LOAD_CATEGORIES', payload: JSON.parse(customJson) });
     }
     setLoaded(true);
+    // 后台从 GitHub 拉取最新工分数据
+    var ghToken = localStorage.getItem('gh_token');
+    if (ghToken) {
+      ghDownloadCategories(ghToken).then(function(remoteCats) {
+        if (remoteCats) {
+          dispatch({ type: 'LOAD_CATEGORIES', payload: remoteCats });
+        }
+      }).catch(function(e) {});
+    }
   }, []);
   useEffect(() => {
     if (loaded) {
