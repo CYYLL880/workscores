@@ -2773,6 +2773,8 @@ function generateGroupText(group) {
     } else if (bianhaoStr) {
       line += '（' + bianhaoStr + '）';
     }
+    var singleScore = isLinxiu ? item.score * 1.5 : item.score;
+    line += ' [单项：' + formatScore(singleScore) + ']';
     lines.push(line);
   });
   return lines.join('\n');
