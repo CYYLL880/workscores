@@ -3069,9 +3069,14 @@ function HomeScreen({
           if (!seqs.includes(it.seq)) seqs.push(it.seq);
         });
       });
+      const emptyGroups = record.workGroups.map(g => ({
+        train: g.train || '',
+        isLinxiu: g.isLinxiu || false,
+        items: []
+      }));
       dispatch({
         type: 'RESTORE_WORK_GROUPS',
-        payload: record.workGroups
+        payload: emptyGroups
       });
       dispatch({
         type: 'ENTER_EXCLUDE_MODE',
@@ -3491,11 +3496,9 @@ function WorkGroupEditScreen({
       className: "search-right"
     }, /*#__PURE__*/React.createElement("div", {
       className: "search-score"
-    }, formatScore(item.score)), inGroup ? /*#__PURE__*/React.createElement("div", {
+    }, formatScore(item.score)), inGroup || excluded ? /*#__PURE__*/React.createElement("div", {
       className: "added-text"
-    }, "\u5DF2\u9009") : excluded ? /*#__PURE__*/React.createElement("div", {
-      className: "add-btn-disabled"
-    }, "+") : /*#__PURE__*/React.createElement("button", {
+    }, "\u5DF2\u9009") : /*#__PURE__*/React.createElement("button", {
       className: "add-btn",
       onClick: () => handleAddStep(item)
     }, "+")));
@@ -3824,11 +3827,9 @@ function CategoryDetailScreen({
       className: "step-name"
     }, item.name), /*#__PURE__*/React.createElement("div", {
       className: "step-sub"
-    }, unitText, " \xB7 \u5DE5\u5206 ", formatScore(item.score))), inGroup ? /*#__PURE__*/React.createElement("div", {
+    }, unitText, " \xB7 \u5DE5\u5206 ", formatScore(item.score))), inGroup || excluded ? /*#__PURE__*/React.createElement("div", {
       className: "added-text"
-    }, "\u5DF2\u9009") : excluded ? /*#__PURE__*/React.createElement("div", {
-      className: "add-btn-disabled"
-    }, "+") : /*#__PURE__*/React.createElement("button", {
+    }, "\u5DF2\u9009") : /*#__PURE__*/React.createElement("button", {
       className: "step-add-btn",
       onClick: () => handleAddStep(item)
     }, "+"));
