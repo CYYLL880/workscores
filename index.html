@@ -4767,7 +4767,12 @@ function App() {
       });
     } catch (e) {}
     const customJson = localStorage.getItem('workscore_custom_categories');
-    if (customJson) {
+    const savedVersion = localStorage.getItem('workscore_data_version');
+    const currentVersion = WORK_SCORES.version;
+    if (savedVersion !== currentVersion) {
+      localStorage.removeItem('workscore_custom_categories');
+      localStorage.setItem('workscore_data_version', currentVersion);
+    } else if (customJson) {
       dispatch({ type: 'LOAD_CATEGORIES', payload: JSON.parse(customJson) });
     }
     setLoaded(true);
