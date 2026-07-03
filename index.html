@@ -4508,8 +4508,8 @@ function CategoryDetailScreen({
     className: "bottom-score"
   }, "\u5C0F\u8BA1\uFF1A", formatScore(groupScore))), /*#__PURE__*/React.createElement("button", {
     className: "back-to-group-btn",
-    onClick: ctx.goBack
-  }, "\u8FD4\u56DE")), addSheet && /*#__PURE__*/React.createElement(QuickAddSheet, {
+    onClick: () => ctx.navigate({ name: 'edit', groupId: groupId })
+  }, "\u9000\u56DE\u5206\u7C7B")), addSheet && /*#__PURE__*/React.createElement(QuickAddSheet, {
     sheet: addSheet,
     onClose: function() { setAddSheet(null); },
     onConfirm: handleSheetConfirm,
