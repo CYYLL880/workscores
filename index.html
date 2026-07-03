@@ -285,6 +285,29 @@
   .modal-confirm { background: #0f172a; color: #fff; }
 
   .back-to-group-btn { background: #0f172a; padding: 12px 18px; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700; }
+
+  /* Quick add sheet (bottom panel) */
+  .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 90; }
+  .sheet-panel {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 480px;
+    background: #fff; border-radius: 18px 18px 0 0; padding: 16px 20px max(20px, env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.12); z-index: 100; max-height: 70vh; overflow-y: auto;
+  }
+  .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .sheet-title { flex: 1; font-size: 14px; font-weight: 700; color: #0f172a; line-height: 19px; padding-right: 12px; }
+  .sheet-close { width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sheet-row { margin-bottom: 12px; }
+  .sheet-label { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 6px; }
+  .sheet-qty-row { display: flex; align-items: center; gap: 8px; }
+  .sheet-qty-btn { width: 36px; height: 36px; border-radius: 10px; background: #f1f5f9; font-size: 18px; font-weight: 700; color: #0f172a; display: flex; align-items: center; justify-content: center; }
+  .sheet-qty-input { flex: 1; height: 36px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; text-align: center; font-size: 15px; font-weight: 700; color: #0f172a; }
+  .sheet-time-row { display: flex; align-items: center; gap: 8px; }
+  .sheet-time-label { font-size: 12px; color: #94a3b8; font-weight: 500; flex-shrink: 0; }
+  .sheet-select { flex: 1; height: 36px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 14px; color: #0f172a; padding: 0 10px; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2364748b' d='M5 6L0 0h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .sheet-input { width: 100%; height: 36px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 14px; color: #0f172a; padding: 0 12px; }
+  .sheet-input::placeholder { color: #94a3b8; }
+  .sheet-add-btn { width: 100%; padding: 13px 0; border-radius: 12px; background: #3b82f6; color: #fff; font-size: 15px; font-weight: 700; margin-top: 4px; }
+  .sheet-hint { font-size: 11px; color: #94a3b8; margin-top: 4px; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -3194,6 +3217,23 @@ const CARD_COLORS = [{
 function formatScore(score) {
   return String(Math.round(score));
 }
+var TIME_OPTIONS = (function() {
+  var arr = [''];
+  for (var h = 0; h < 24; h++) {
+    arr.push(h + ':00');
+    arr.push(h + ':30');
+  }
+  return arr;
+})();
+function calcQtyFromTime(start, end) {
+  if (!start || !end) return null;
+  var sp = start.split(':');
+  var ep = end.split(':');
+  var sMin = parseInt(sp[0]) * 60 + parseInt(sp[1]);
+  var eMin = parseInt(ep[0]) * 60 + parseInt(ep[1]);
+  var diff = (eMin - sMin) / 60;
+  return diff > 0 ? diff : null;
+}
 function formatTime(timeRange) {
   if (!timeRange) return '';
   return timeRange.replace(/:/g, '.');
@@ -3295,7 +3335,10 @@ function appReducer(state, action) {
         const {
           groupId,
           step,
-          category
+          category,
+          quantity,
+          timeRange,
+          bianhao
         } = action.payload;
         return {
           ...state,
@@ -3310,9 +3353,9 @@ function appReducer(state, action) {
               unit: step.unit || '',
               categoryName: category && category.short_name || '',
               categoryId: category && category.id || null,
-              quantity: 1,
-              timeRange: '',
-              bianhao: ''
+              quantity: quantity != null ? quantity : 1,
+              timeRange: timeRange || '',
+              bianhao: bianhao || ''
             };
             return {
               ...g,
@@ -3725,6 +3768,45 @@ function HomeScreen({
     }
   }, "\u786E\u8BA4")))) : null);
 }
+function QuickAddSheet(props) {
+  var sheet = props.sheet, onClose = props.onClose, onConfirm = props.onConfirm, onTimeChange = props.onTimeChange, onQtyChange = props.onQtyChange, onBianhaoChange = props.onBianhaoChange;
+  if (!sheet) return null;
+  var step = sheet.step;
+  var timeOptions = TIME_OPTIONS.map(function(t) {
+    return React.createElement("option", { key: t, value: t }, t || '不选');
+  });
+  return React.createElement(React.Fragment, null,
+    React.createElement("div", { className: "sheet-overlay", onClick: onClose }),
+    React.createElement("div", { className: "sheet-panel" },
+      React.createElement("div", { className: "sheet-header" },
+        React.createElement("div", { className: "sheet-title" }, step.seq + " · " + step.name),
+        React.createElement("button", { className: "sheet-close", onClick: onClose }, "×")
+      ),
+      React.createElement("div", { className: "sheet-row" },
+        React.createElement("div", { className: "sheet-label" }, "数量"),
+        React.createElement("div", { className: "sheet-qty-row" },
+          React.createElement("button", { className: "sheet-qty-btn", onClick: function() { onQtyChange(Math.max(0.5, Math.round((sheet.qty - 0.5) * 10) / 10)); } }, "−"),
+          React.createElement("input", { className: "sheet-qty-input", type: "number", step: "0.5", value: sheet.qty, onChange: function(e) { onQtyChange(parseFloat(e.target.value) || 1); } }),
+          React.createElement("button", { className: "sheet-qty-btn", onClick: function() { onQtyChange(Math.round((sheet.qty + 0.5) * 10) / 10); } }, "+")
+        )
+      ),
+      React.createElement("div", { className: "sheet-row" },
+        React.createElement("div", { className: "sheet-label" }, "时间（可选）"),
+        React.createElement("div", { className: "sheet-time-row" },
+          React.createElement("select", { className: "sheet-select", value: sheet.timeStart, onChange: function(e) { onTimeChange('timeStart', e.target.value); } }, timeOptions),
+          React.createElement("div", { className: "sheet-time-label" }, "至"),
+          React.createElement("select", { className: "sheet-select", value: sheet.timeEnd, onChange: function(e) { onTimeChange('timeEnd', e.target.value); } }, timeOptions)
+        ),
+        sheet.timeStart && sheet.timeEnd ? React.createElement("div", { className: "sheet-hint" }, "已自动按时间差调整数量") : null
+      ),
+      React.createElement("div", { className: "sheet-row" },
+        React.createElement("div", { className: "sheet-label" }, "编号（可选）"),
+        React.createElement("input", { className: "sheet-input", placeholder: "输入编号，多个用 / 分隔", value: sheet.bianhao, onChange: function(e) { onBianhaoChange(e.target.value); } })
+      ),
+      React.createElement("button", { className: "sheet-add-btn", onClick: onConfirm }, "添加到作业组")
+    )
+  );
+}
 function WorkGroupEditScreen({
   ctx,
   groupId
@@ -3757,6 +3839,7 @@ function WorkGroupEditScreen({
     seq: null,
     value: ''
   });
+  const [addSheet, setAddSheet] = useState(null);
   if (!group) {
     return /*#__PURE__*/React.createElement("div", {
       className: "app"
@@ -3813,14 +3896,41 @@ function WorkGroupEditScreen({
     });
   };
   const handleAddStep = step => {
-    const category = categories.find(c => c.id === step.categoryId);
+    setAddSheet({ step: step, qty: 1, timeStart: '', timeEnd: '', bianhao: '' });
+  };
+  const handleSheetConfirm = () => {
+    if (!addSheet) return;
+    var category = categories.find(c => c.id === addSheet.step.categoryId);
+    var timeRange = '';
+    if (addSheet.timeStart && addSheet.timeEnd) {
+      timeRange = addSheet.timeStart + '-' + addSheet.timeEnd;
+    } else if (addSheet.timeStart) {
+      timeRange = addSheet.timeStart;
+    }
     dispatch({
       type: 'ADD_ITEM_TO_GROUP',
       payload: {
-        groupId,
-        step,
-        category
+        groupId: groupId,
+        step: addSheet.step,
+        category: category,
+        quantity: addSheet.qty,
+        timeRange: timeRange,
+        bianhao: addSheet.bianhao || ''
       }
+    });
+    setAddSheet(null);
+  };
+  const handleSheetTimeChange = function(field, val) {
+    setAddSheet(function(prev) {
+      var next = Object.assign({}, prev);
+      next[field] = val;
+      if (field === 'timeStart' || field === 'timeEnd') {
+        var s = field === 'timeStart' ? val : prev.timeStart;
+        var e = field === 'timeEnd' ? val : prev.timeEnd;
+        var auto = calcQtyFromTime(s, e);
+        if (auto !== null) next.qty = auto;
+      }
+      return next;
     });
   };
   const handleRemoveItem = seq => dispatch({
@@ -4235,7 +4345,14 @@ function WorkGroupEditScreen({
   }, "\u53D6\u6D88"), /*#__PURE__*/React.createElement("button", {
     className: "modal-btn modal-confirm",
     onClick: saveBianhao
-  }, "\u4FDD\u5B58"))));
+  }, "\u4FDD\u5B58"))), addSheet && /*#__PURE__*/React.createElement(QuickAddSheet, {
+    sheet: addSheet,
+    onClose: function() { setAddSheet(null); },
+    onConfirm: handleSheetConfirm,
+    onTimeChange: handleSheetTimeChange,
+    onQtyChange: function(v) { setAddSheet(Object.assign({}, addSheet, { qty: v })); },
+    onBianhaoChange: function(v) { setAddSheet(Object.assign({}, addSheet, { bianhao: v })); }
+  }));
 }
 function CategoryDetailScreen({
   ctx,
@@ -4243,6 +4360,7 @@ function CategoryDetailScreen({
   groupId
 }) {
   const {
+    categories,
     getCategoryById,
     getGroupById,
     dispatch,
@@ -4251,6 +4369,7 @@ function CategoryDetailScreen({
     excludedSeqs
   } = ctx;
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [addSheet, setAddSheet] = useState(null);
   const category = getCategoryById(categoryId);
   const group = getGroupById(groupId);
   if (!category) {
@@ -4284,13 +4403,40 @@ function CategoryDetailScreen({
   };
   const handleAddStep = step => {
     if (!group) return;
+    setAddSheet({ step: step, qty: 1, timeStart: '', timeEnd: '', bianhao: '' });
+  };
+  const handleSheetConfirm = () => {
+    if (!addSheet) return;
+    var timeRange = '';
+    if (addSheet.timeStart && addSheet.timeEnd) {
+      timeRange = addSheet.timeStart + '-' + addSheet.timeEnd;
+    } else if (addSheet.timeStart) {
+      timeRange = addSheet.timeStart;
+    }
     dispatch({
       type: 'ADD_ITEM_TO_GROUP',
       payload: {
-        groupId,
-        step,
-        category
+        groupId: groupId,
+        step: addSheet.step,
+        category: category,
+        quantity: addSheet.qty,
+        timeRange: timeRange,
+        bianhao: addSheet.bianhao || ''
       }
+    });
+    setAddSheet(null);
+  };
+  const handleSheetTimeChange = function(field, val) {
+    setAddSheet(function(prev) {
+      var next = Object.assign({}, prev);
+      next[field] = val;
+      if (field === 'timeStart' || field === 'timeEnd') {
+        var s = field === 'timeStart' ? val : prev.timeStart;
+        var e = field === 'timeEnd' ? val : prev.timeEnd;
+        var auto = calcQtyFromTime(s, e);
+        if (auto !== null) next.qty = auto;
+      }
+      return next;
     });
   };
   const groupScore = group ? getGroupScore(group) : 0;
@@ -4363,7 +4509,14 @@ function CategoryDetailScreen({
   }, "\u5C0F\u8BA1\uFF1A", formatScore(groupScore))), /*#__PURE__*/React.createElement("button", {
     className: "back-to-group-btn",
     onClick: ctx.goBack
-  }, "\u8FD4\u56DE")));
+  }, "\u8FD4\u56DE")), addSheet && /*#__PURE__*/React.createElement(QuickAddSheet, {
+    sheet: addSheet,
+    onClose: function() { setAddSheet(null); },
+    onConfirm: handleSheetConfirm,
+    onTimeChange: handleSheetTimeChange,
+    onQtyChange: function(v) { setAddSheet(Object.assign({}, addSheet, { qty: v })); },
+    onBianhaoChange: function(v) { setAddSheet(Object.assign({}, addSheet, { bianhao: v })); }
+  }));
 }
 function OutputScreen({
   ctx
