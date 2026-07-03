@@ -3941,7 +3941,7 @@ function WorkGroupEditScreen({
     }
   });
   const handleQuantity = (seq, delta, current) => {
-    const next = Math.max(1, current + delta);
+    var next = Math.max(0.5, Math.round((current + delta * 0.5) * 10) / 10);
     dispatch({
       type: 'UPDATE_GROUP_ITEM',
       payload: {
