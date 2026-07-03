@@ -275,6 +275,8 @@
   .modal-label { font-size: 12px; color: #64748b; margin: 10px 0 6px; font-weight: 500; }
   .modal-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #0f172a; background: #fff; }
   .modal-input::placeholder { color: #94a3b8; }
+  .modal-select { width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #0f172a; background: #fff; -webkit-appearance: none; appearance: none; background-image: linear-gradient(45deg, transparent 50%, #64748b 50%), linear-gradient(135deg, #64748b 50%, transparent 50%); background-position: calc(100% - 16px) center, calc(100% - 11px) center; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+  .modal-hint { margin-top: 8px; padding: 8px 12px; background: #eff6ff; border-radius: 8px; font-size: 12px; color: #1d4ed8; font-weight: 500; }
   .modal-textarea { width: 100%; min-height: 60px; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #0f172a; background: #fff; resize: vertical; }
   .quick-time-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
   .quick-time-tag { padding: 7px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 12px; color: #0f172a; font-weight: 500; }
@@ -3985,15 +3987,18 @@ function WorkGroupEditScreen({
     });
   };
   const saveTime = () => {
-    const range = timeModal.start + '-' + timeModal.end;
+    const range = timeModal.start && timeModal.end ? (timeModal.start + '-' + timeModal.end) : (timeModal.start || '');
+    const updates = { timeRange: range };
+    const autoQty = calcQtyFromTime(timeModal.start, timeModal.end);
+    if (autoQty !== null) {
+      updates.quantity = autoQty;
+    }
     dispatch({
       type: 'UPDATE_GROUP_ITEM',
       payload: {
         groupId,
         seq: timeModal.seq,
-        updates: {
-          timeRange: range
-        }
+        updates
       }
     });
     setTimeModal({
@@ -4284,25 +4289,34 @@ function WorkGroupEditScreen({
     }, preset.label);
   })), /*#__PURE__*/React.createElement("div", {
     className: "modal-label"
-  }, "\u5F00\u59CB\u65F6\u95F4\uFF08HH:MM\uFF09"), /*#__PURE__*/React.createElement("input", {
-    className: "modal-input",
-    placeholder: "8:30",
+  }, "\u5F00\u59CB\u65F6\u95F4"), /*#__PURE__*/React.createElement("select", {
+    className: "modal-select",
     value: timeModal.start,
     onChange: e => setTimeModal({
       ...timeModal,
       start: e.target.value
     })
-  }), /*#__PURE__*/React.createElement("div", {
+  }, TIME_OPTIONS.map(t => /*#__PURE__*/React.createElement("option", {
+    key: t || 'none',
+    value: t
+  }, t || '不选'))), /*#__PURE__*/React.createElement("div", {
     className: "modal-label"
-  }, "\u7ED3\u675F\u65F6\u95F4\uFF08HH:MM\uFF09"), /*#__PURE__*/React.createElement("input", {
-    className: "modal-input",
-    placeholder: "10:30",
+  }, "\u7ED3\u675F\u65F6\u95F4"), /*#__PURE__*/React.createElement("select", {
+    className: "modal-select",
     value: timeModal.end,
     onChange: e => setTimeModal({
       ...timeModal,
       end: e.target.value
     })
-  }), /*#__PURE__*/React.createElement("div", {
+  }, TIME_OPTIONS.map(t => /*#__PURE__*/React.createElement("option", {
+    key: t || 'none',
+    value: t
+  }, t || '不选'))), function() {
+    var auto = calcQtyFromTime(timeModal.start, timeModal.end);
+    return auto !== null ? /*#__PURE__*/React.createElement("div", {
+      className: "modal-hint"
+    }, "\u5C06\u81EA\u52A8\u8C03\u6574\u6570\u91CF\u4E3A\uFF1A" + auto) : null;
+  }(), /*#__PURE__*/React.createElement("div", {
     className: "modal-btn-row"
   }, /*#__PURE__*/React.createElement("button", {
     className: "modal-btn modal-cancel",
